@@ -1,5 +1,4 @@
-import { Logger } from 'vite';
-import { BaseSource } from './source';
+import type { BaseSource } from './source';
 export type SourceType = 'github' | 'coding' | BaseSource;
 export type MkcertBaseOptions = {
     /**
@@ -38,7 +37,7 @@ export type MkcertBaseOptions = {
     certFileName?: string;
 };
 export type MkcertOptions = MkcertBaseOptions & {
-    logger: Logger;
+    logger: Console;
 };
 declare class Mkcert {
     private force?;

@@ -1,13 +1,3 @@
-// plugin/index.ts
-import { createLogger } from "vite";
-
-// plugin/lib/constant.ts
-import os from "os";
-import path from "path";
-var PKG_NAME = "vite-plugin-mkcert";
-var PLUGIN_NAME = PKG_NAME.replace(/-/g, ":");
-var PLUGIN_DATA_DIR = path.join(os.homedir(), `.${PKG_NAME}`);
-
 // plugin/lib/util.ts
 import child_process from "child_process";
 import crypto from "crypto";
@@ -15,6 +5,15 @@ import fs from "fs";
 import os2 from "os";
 import path2 from "path";
 import util from "util";
+
+// plugin/lib/constant.ts
+import os from "os";
+import path from "path";
+var PKG_NAME = "publishjs-mkcert";
+var PLUGIN_NAME = PKG_NAME.replace(/-/g, ":");
+var PLUGIN_DATA_DIR = path.join(os.homedir(), `.${PKG_NAME}`);
+
+// plugin/lib/util.ts
 var exists = async (filePath) => {
   try {
     await fs.promises.access(filePath);
@@ -116,8 +115,8 @@ var escape = (path5) => {
 
 // plugin/mkcert/index.ts
 import path4 from "path";
-import process2 from "process";
 import pc from "picocolors";
+import process2 from "process";
 
 // plugin/lib/logger.ts
 import Debug from "debug";
@@ -450,7 +449,7 @@ var Mkcert = class _Mkcert {
     } else if (await exists(this.savedMkcert)) {
       binary = this.savedMkcert;
     }
-    return binary ? escape(binary) : void 0;
+    return binary;
   }
   async checkCAExists() {
     const files = await readDir(this.savePath);
@@ -619,47 +618,24 @@ ${this.certFilePath}`
 var mkcert_default = Mkcert;
 
 // plugin/index.ts
-var plugin = (options = {}) => {
+async function mkcert(options = {}) {
+  const { hosts = [], ...mkcertOptions } = options;
+  const logger = console;
+  const mkcert2 = mkcert_default.create({
+    logger,
+    ...mkcertOptions
+  });
+  await mkcert2.init();
+  const allHosts = [...getDefaultHosts(), ...hosts];
+  const uniqueHosts = Array.from(new Set(allHosts)).filter(Boolean);
+  const certificate = await mkcert2.install(uniqueHosts);
   return {
-    name: PLUGIN_NAME,
-    apply: "serve",
-    config: async ({ server = {}, logLevel }) => {
-      if (typeof server.https === "boolean" && server.https === false) {
-        return;
-      }
-      const { hosts = [], ...mkcertOptions } = options;
-      const logger = createLogger(logLevel, {
-        prefix: PLUGIN_NAME
-      });
-      const mkcert = mkcert_default.create({
-        logger,
-        ...mkcertOptions
-      });
-      await mkcert.init();
-      const allHosts = [...getDefaultHosts(), ...hosts];
-      if (typeof server.host === "string") {
-        allHosts.push(server.host);
-      }
-      const uniqueHosts = Array.from(new Set(allHosts)).filter(Boolean);
-      const certificate = await mkcert.install(uniqueHosts);
-      const httpsConfig = {
-        key: certificate.key && Buffer.from(certificate.key),
-        cert: certificate.cert && Buffer.from(certificate.cert)
-      };
-      return {
-        server: {
-          https: httpsConfig
-        },
-        preview: {
-          https: httpsConfig
-        }
-      };
-    }
+    key: certificate.key && Buffer.from(certificate.key),
+    cert: certificate.cert && Buffer.from(certificate.cert)
   };
-};
-var plugin_default = plugin;
+}
 export {
   BaseSource,
-  plugin_default as default
+  mkcert
 };
 //# sourceMappingURL=mkcert.mjs.map

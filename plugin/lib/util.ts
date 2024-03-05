@@ -1,11 +1,12 @@
-import child_process, { ExecOptions } from 'child_process'
-import crypto from 'crypto'
-import fs from 'fs'
-import os from 'os'
-import path from 'path'
-import util from 'util'
+import type { ExecOptions } from 'child_process';
+import child_process from 'child_process';
+import crypto from 'crypto';
+import fs from 'fs';
+import os from 'os';
+import path from 'path';
+import util from 'util';
 
-import { PLUGIN_NAME } from './constant'
+import { PLUGIN_NAME } from './constant';
 
 /**
  * Check if file exists
@@ -15,129 +16,131 @@ import { PLUGIN_NAME } from './constant'
  */
 export const exists = async (filePath: string) => {
   try {
-    await fs.promises.access(filePath)
-    return true
+    await fs.promises.access(filePath);
+    return true;
   } catch (error) {
-    return false
+    return false;
   }
-}
+};
 
 export const mkdir = async (dirname: string) => {
-  const isExist = await exists(dirname)
+  const isExist = await exists(dirname);
 
   if (!isExist) {
-    await fs.promises.mkdir(dirname, { recursive: true })
+    await fs.promises.mkdir(dirname, { recursive: true });
   }
-}
+};
 
 export const ensureDirExist = async (filePath: string, strip = false) => {
-  const dirname = strip ? path.dirname(filePath) : filePath
-  await mkdir(dirname)
-}
+  const dirname = strip ? path.dirname(filePath) : filePath;
+  await mkdir(dirname);
+};
 
 export const readFile = async (filePath: string) => {
-  const isExist = await exists(filePath)
-  return isExist ? (await fs.promises.readFile(filePath)).toString() : undefined
-}
+  const isExist = await exists(filePath);
+  return isExist
+    ? (await fs.promises.readFile(filePath)).toString()
+    : undefined;
+};
 
 export const writeFile = async (
   filePath: string,
-  data: string | Uint8Array
+  data: string | Uint8Array,
 ) => {
-  await ensureDirExist(filePath, true)
-  await fs.promises.writeFile(filePath, data)
-  await fs.promises.chmod(filePath, 0o777)
-}
+  await ensureDirExist(filePath, true);
+  await fs.promises.writeFile(filePath, data);
+  await fs.promises.chmod(filePath, 0o777);
+};
 
 export const readDir = async (source: string) => {
-  return fs.promises.readdir(source)
-}
+  return fs.promises.readdir(source);
+};
 
 export const copyDir = async (source: string, dest: string) => {
   try {
     await fs.promises.cp(source, dest, {
-      recursive: true
-    })
-  } catch (error: any) {
+      recursive: true,
+    });
+  } catch (error: unknown) {
     // Fails when nodejs version < 16.7.0, ignore?
-    console.log(`${PLUGIN_NAME}:`, error)
+    console.log(`${PLUGIN_NAME}:`, error);
   }
-}
+};
 
 export const exec = async (cmd: string, options?: ExecOptions) => {
-  return util.promisify(child_process.exec)(cmd, options)
-}
+  return util.promisify(child_process.exec)(cmd, options);
+};
 
 /**
  * http://nodejs.cn/api/os/os_networkinterfaces.html
  */
 const isIPV4 = (family: string | number) => {
-  return family === 'IPv4' || family === 4
-}
+  return family === 'IPv4' || family === 4;
+};
 
 export const getLocalV4Ips = () => {
-  const interfaceDict = os.networkInterfaces()
-  const addresses: string[] = []
+  const interfaceDict = os.networkInterfaces();
+  const addresses: string[] = [];
   for (const key in interfaceDict) {
-    const interfaces = interfaceDict[key]
+    const interfaces = interfaceDict[key];
     if (interfaces) {
       for (const item of interfaces) {
         if (isIPV4(item.family)) {
-          addresses.push(item.address)
+          addresses.push(item.address);
         }
       }
     }
   }
 
-  return addresses
-}
+  return addresses;
+};
 
 export const getDefaultHosts = () => {
-  return ['localhost', ...getLocalV4Ips()]
-}
+  return ['localhost', ...getLocalV4Ips()];
+};
 
 export const getHash = async (filePath: string) => {
-  const content = await readFile(filePath)
+  const content = await readFile(filePath);
 
   if (content) {
-    const hash = crypto.createHash('sha256')
-    hash.update(content)
-    return hash.digest('hex')
+    const hash = crypto.createHash('sha256');
+    hash.update(content);
+    return hash.digest('hex');
   }
 
-  return undefined
-}
+  return undefined;
+};
 
 const isObj = (obj: any) =>
-  Object.prototype.toString.call(obj) === '[object Object]'
+  Object.prototype.toString.call(obj) === '[object Object]';
 
 const mergeObj = (target: any, source: any) => {
   if (!(isObj(target) && isObj(source))) {
-    return target
+    return target;
   }
 
   for (const key in source) {
     if (Object.prototype.hasOwnProperty.call(source, key)) {
-      const targetValue = target[key]
-      const sourceValue = source[key]
+      const targetValue = target[key];
+      const sourceValue = source[key];
 
       if (isObj(targetValue) && isObj(sourceValue)) {
-        mergeObj(targetValue, sourceValue)
+        mergeObj(targetValue, sourceValue);
       } else {
-        target[key] = sourceValue
+        target[key] = sourceValue;
       }
     }
   }
-}
+};
 
 export const deepMerge = (target: any, ...source: any[]) => {
-  return source.reduce((a, b) => mergeObj(a, b), target)
-}
+  return source.reduce((a, b) => mergeObj(a, b), target);
+};
 
 export const prettyLog = (obj?: Record<string, any>) => {
-  return JSON.stringify(obj, null, 2)
-}
+  return JSON.stringify(obj, null, 2);
+};
 
 export const escape = (path?: string) => {
-  return `"${path}"`
-}
+  return `"${path}"`;
+};

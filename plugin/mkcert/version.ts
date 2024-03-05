@@ -1,64 +1,63 @@
-import { debug } from '../lib/logger'
-
-import Config from './config'
+import { debug } from '../lib/logger';
+import type Config from './config';
 
 export type VersionMangerProps = {
-  config: Config
-}
+  config: Config;
+};
 
 const parseVersion = (version: string) => {
-  const str = version.trim().replace(/v/i, '')
+  const str = version.trim().replace(/v/i, '');
 
-  return str.split('.')
-}
+  return str.split('.');
+};
 
 class VersionManger {
-  private config: Config
+  private config: Config;
 
   public constructor(props: VersionMangerProps) {
-    this.config = props.config
+    this.config = props.config;
   }
 
   public async update(version: string) {
     try {
-      await this.config.merge({ version })
+      await this.config.merge({ version });
     } catch (err) {
-      debug('Failed to record mkcert version info: %o', err)
+      debug('Failed to record mkcert version info: %o', err);
     }
   }
 
   public compare(version: string) {
-    const currentVersion = this.config.getVersion()
+    const currentVersion = this.config.getVersion();
 
     if (!currentVersion) {
       return {
         currentVersion,
         nextVersion: version,
         breakingChange: false,
-        shouldUpdate: true
-      }
+        shouldUpdate: true,
+      };
     }
 
-    let breakingChange = false
-    let shouldUpdate = false
+    let breakingChange = false;
+    let shouldUpdate = false;
 
-    const newVersion = parseVersion(version)
-    const oldVersion = parseVersion(currentVersion)
+    const newVersion = parseVersion(version);
+    const oldVersion = parseVersion(currentVersion);
 
     for (let i = 0; i < newVersion.length; i++) {
       if (newVersion[i] > oldVersion[i]) {
-        shouldUpdate = true
-        breakingChange = i === 0
-        break
+        shouldUpdate = true;
+        breakingChange = i === 0;
+        break;
       }
     }
     return {
       breakingChange,
       shouldUpdate,
       currentVersion,
-      nextVersion: version
-    }
+      nextVersion: version,
+    };
   }
 }
 
-export default VersionManger
+export default VersionManger;

@@ -1,5 +1,5 @@
 /// <reference types="node" />
-import { ExecOptions } from 'child_process';
+import type { ExecOptions } from 'child_process';
 /**
  * Check if file exists
  *

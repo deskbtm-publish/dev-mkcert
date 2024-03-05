@@ -1,83 +1,83 @@
-import path from 'path'
+import path from 'path';
 
-import { debug } from '../lib/logger'
-import { readFile, writeFile, prettyLog, deepMerge } from '../lib/util'
+import { debug } from '../lib/logger';
+import { deepMerge, prettyLog, readFile, writeFile } from '../lib/util';
 
 export type RecordMate = {
   /**
    * The hosts that have generated certificate
    */
-  hosts: string[]
+  hosts: string[];
 
   /**
    * file hash
    */
-  hash?: RecordHash
-}
+  hash?: RecordHash;
+};
 
 export type RecordHash = {
-  key?: string
-  cert?: string
-}
+  key?: string;
+  cert?: string;
+};
 
 export type ConfigOptions = {
-  savePath: string
-}
+  savePath: string;
+};
 
-const CONFIG_FILE_NAME = 'config.json'
+const CONFIG_FILE_NAME = 'config.json';
 
 class Config {
   /**
    * The mkcert version
    */
-  private version: string | undefined
+  private version: string | undefined;
 
-  private record: RecordMate | undefined
+  private record: RecordMate | undefined;
 
-  private configFilePath: string
+  private configFilePath: string;
 
   constructor({ savePath }: ConfigOptions) {
-    this.configFilePath = path.resolve(savePath, CONFIG_FILE_NAME)
+    this.configFilePath = path.resolve(savePath, CONFIG_FILE_NAME);
   }
 
   public async init() {
-    const str = await readFile(this.configFilePath)
-    const options = str ? JSON.parse(str) : undefined
+    const str = await readFile(this.configFilePath);
+    const options = str ? JSON.parse(str) : undefined;
 
     if (options) {
-      this.version = options.version
-      this.record = options.record
+      this.version = options.version;
+      this.record = options.record;
     }
   }
 
   private async serialize() {
-    await writeFile(this.configFilePath, prettyLog(this))
+    await writeFile(this.configFilePath, prettyLog(this));
   }
 
   // deep merge
-  public async merge(obj: Record<string, any>) {
-    const currentStr = prettyLog(this)
+  public async merge(obj: Record<string, unknown>) {
+    const currentStr = prettyLog(this);
 
-    deepMerge(this, obj)
+    deepMerge(this, obj);
 
-    const nextStr = prettyLog(this)
+    const nextStr = prettyLog(this);
 
     debug(
       `Receive parameter\n ${prettyLog(
-        obj
-      )}\nUpdate config from\n ${currentStr} \nto\n ${nextStr}`
-    )
+        obj,
+      )}\nUpdate config from\n ${currentStr} \nto\n ${nextStr}`,
+    );
 
-    await this.serialize()
+    await this.serialize();
   }
 
   public getRecord() {
-    return this.record
+    return this.record;
   }
 
   public getVersion() {
-    return this.version
+    return this.version;
   }
 }
 
-export default Config
+export default Config;

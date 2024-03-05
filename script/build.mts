@@ -1,22 +1,22 @@
-import { execSync } from 'child_process'
-import fs from 'fs'
-import path from 'path'
-import { fileURLToPath } from 'url'
+import { execSync } from 'child_process';
+import type { Format } from 'esbuild';
+import { buildSync } from 'esbuild';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-import { buildSync, Format } from 'esbuild'
+import pkg from '../package.json';
 
-import pkg from '../package.json'
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const WORKSPACE = path.resolve(__dirname, '..');
 
-const WORKSPACE = path.resolve(__dirname, '..')
-
-const OUTDIR = path.resolve(WORKSPACE, 'dist')
+const OUTDIR = path.resolve(WORKSPACE, 'dist');
 
 fs.rmSync(OUTDIR, {
   force: true,
-  recursive: true
-})
+  recursive: true,
+});
 
 const build = (format: Format) => {
   buildSync({
@@ -30,18 +30,16 @@ const build = (format: Format) => {
     minify: false,
     outdir: OUTDIR,
     outExtension: {
-      ['.js']: format === 'esm' ? '.mjs' : '.js'
+      ['.js']: format === 'esm' ? '.mjs' : '.js',
     },
-    external: Object.keys(pkg.dependencies).concat(
-      Object.keys(pkg.peerDependencies)
-    )
-  })
-}
+    external: Object.keys(pkg.dependencies).concat(),
+  });
+};
 
-const formats: Format[] = ['cjs', 'esm']
+const formats: Format[] = ['cjs', 'esm'];
 
 for (const format of formats) {
-  build(format)
+  build(format);
 }
 
-execSync('tsc -p tsconfig.build.json')
+execSync('tsc -p tsconfig.build.json');

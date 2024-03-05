@@ -1,5 +1,5 @@
-import { type PluginOption } from 'vite';
-import { MkcertBaseOptions } from './mkcert/index';
+/// <reference types="node" />
+import type { MkcertBaseOptions } from './mkcert/index';
 export { BaseSource, type SourceInfo } from './mkcert/source';
 export type MkcertPluginOptions = MkcertBaseOptions & {
     /**
@@ -7,5 +7,7 @@ export type MkcertPluginOptions = MkcertBaseOptions & {
      */
     hosts?: string[];
 };
-declare const plugin: (options?: MkcertPluginOptions) => PluginOption;
-export default plugin;
+export declare function mkcert(options?: MkcertPluginOptions): Promise<{
+    key: Buffer;
+    cert: Buffer;
+}>;

@@ -1,20 +1,20 @@
-import { Octokit } from '@octokit/rest'
+import { Octokit } from '@octokit/rest';
 
-import request from '../lib/request'
+import request from '../lib/request';
 
 export type SourceInfo = {
-  version: string
-  downloadUrl: string
-}
+  version: string;
+  downloadUrl: string;
+};
 
 export abstract class BaseSource {
-  abstract getSourceInfo(): Promise<SourceInfo | undefined>
+  abstract getSourceInfo(): Promise<SourceInfo | undefined>;
 
   protected getPlatformIdentifier() {
-    const arch = process.arch === 'x64' ? 'amd64' : process.arch
+    const arch = process.arch === 'x64' ? 'amd64' : process.arch;
     return process.platform === 'win32'
       ? `windows-${arch}.exe`
-      : `${process.platform}-${arch}`
+      : `${process.platform}-${arch}`;
   }
 }
 
@@ -23,34 +23,34 @@ export abstract class BaseSource {
  */
 export class GithubSource extends BaseSource {
   public static create() {
-    return new GithubSource()
+    return new GithubSource();
   }
 
   private constructor() {
-    super()
+    super();
   }
 
   public async getSourceInfo(): Promise<SourceInfo | undefined> {
-    const octokit = new Octokit()
+    const octokit = new Octokit();
     const { data } = await octokit.repos.getLatestRelease({
       owner: 'FiloSottile',
-      repo: 'mkcert'
-    })
-    const platformIdentifier = this.getPlatformIdentifier()
+      repo: 'mkcert',
+    });
+    const platformIdentifier = this.getPlatformIdentifier();
 
-    const version = data.tag_name
-    const downloadUrl = data.assets.find(item =>
-      item.name.includes(platformIdentifier)
-    )?.browser_download_url
+    const version = data.tag_name;
+    const downloadUrl = data.assets.find((item) =>
+      item.name.includes(platformIdentifier),
+    )?.browser_download_url;
 
     if (!(version && downloadUrl)) {
-      return undefined
+      return undefined;
     }
 
     return {
       downloadUrl,
-      version
-    }
+      version,
+    };
   }
 }
 
@@ -60,29 +60,29 @@ export class GithubSource extends BaseSource {
  * @see https://help.coding.net/openapi
  */
 export class CodingSource extends BaseSource {
-  public static CODING_API = 'https://e.coding.net/open-api'
+  public static CODING_API = 'https://e.coding.net/open-api';
   public static CODING_AUTHORIZATION =
-    'token 000f7831ec425079439b0f55f55c729c9280d66e'
-  public static CODING_PROJECT_ID = 8524617
-  public static REPOSITORY = 'mkcert'
+    'token 000f7831ec425079439b0f55f55c729c9280d66e';
+  public static CODING_PROJECT_ID = 8524617;
+  public static REPOSITORY = 'mkcert';
 
   public static create() {
-    return new CodingSource()
+    return new CodingSource();
   }
 
   private constructor() {
-    super()
+    super();
   }
 
-  private async request(data: any) {
+  private async request(data: unknown) {
     return request({
       data,
       method: 'POST',
       url: CodingSource.CODING_API,
       headers: {
-        Authorization: CodingSource.CODING_AUTHORIZATION
-      }
-    })
+        Authorization: CodingSource.CODING_AUTHORIZATION,
+      },
+    });
   }
 
   /**
@@ -93,7 +93,7 @@ export class CodingSource extends BaseSource {
    * @returns name
    */
   private getPackageName() {
-    return `mkcert-${this.getPlatformIdentifier()}`
+    return `mkcert-${this.getPlatformIdentifier()}`;
   }
 
   async getSourceInfo(): Promise<SourceInfo | undefined> {
@@ -105,13 +105,13 @@ export class CodingSource extends BaseSource {
       ProjectId: CodingSource.CODING_PROJECT_ID,
       Repository: CodingSource.REPOSITORY,
       Package: this.getPackageName(),
-      PageSize: 1
-    })
+      PageSize: 1,
+    });
 
-    const version = VersionData.Response.Data?.InstanceSet[0]?.Version
+    const version = VersionData.Response.Data?.InstanceSet[0]?.Version;
 
     if (!version) {
-      return undefined
+      return undefined;
     }
 
     /**
@@ -122,18 +122,18 @@ export class CodingSource extends BaseSource {
       ProjectId: CodingSource.CODING_PROJECT_ID,
       Repository: CodingSource.REPOSITORY,
       Package: this.getPackageName(),
-      PackageVersion: version
-    })
+      PackageVersion: version,
+    });
 
-    const downloadUrl = FileData.Response.Url
+    const downloadUrl = FileData.Response.Url;
 
     if (!downloadUrl) {
-      return undefined
+      return undefined;
     }
 
     return {
       downloadUrl,
-      version
-    }
+      version,
+    };
   }
 }

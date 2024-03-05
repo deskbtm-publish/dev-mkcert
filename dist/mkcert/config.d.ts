@@ -25,7 +25,7 @@ declare class Config {
     constructor({ savePath }: ConfigOptions);
     init(): Promise<void>;
     private serialize;
-    merge(obj: Record<string, any>): Promise<void>;
+    merge(obj: Record<string, unknown>): Promise<void>;
     getRecord(): RecordMate;
     getVersion(): string;
 }

@@ -1,27 +1,36 @@
 {
-  "name": "vite-plugin-mkcert",
-  "version": "1.17.4",
-  "description": "Provide certificates for vite's https dev service",
+  "name": "@publishjs/dev-mkcert",
+  "version": "1.17.5",
+  "description": "Provide certificates for https dev service",
   "repository": {
     "type": "git",
-    "url": "https://github.com/liuweiGL/vite-plugin-mkcert.git"
+    "url": "https://github.com/deskbtm-publish/dev-mkcert.git"
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/",
+    "access": "public"
   },
   "keywords": [
-    "vite-plugin",
+    "webpack",
+    "vite",
+    "plug",
     "certificate",
+    "development",
+    "tls",
+    "ssl",
+    "localhost",
     "https",
     "mkcert"
   ],
-  "author": "liuweigl",
+  "author": "Han <han@deskbtm.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/liuweiGL/vite-plugin-mkcert/issues"
+    "url": "https://github.com/deskbtm-publish/dev-mkcert/issues"
   },
-  "homepage": "https://github.com/liuweiGL/vite-plugin-mkcert#readme",
+  "homepage": "https://github.com/deskbtm-publish/dev-mkcert#readme",
   "engines": {
     "node": ">=v16.7.0"
   },
-  "packageManager": "pnpm@8.0.0+",
   "types": "./dist/index.d.ts",
   "module": "./dist/mkcert.mjs",
   "main": "./dist/mkcert.js",
@@ -37,8 +46,9 @@
     }
   },
   "scripts": {
-    "test": "pnpm build && del /Q \"./node_modules/.mkcert\" && vite -c playground/vite.config.ts --clearScreen false",
+    "dev": "yarn build && shx rm -rf \"./node_modules/.mkcert\" && webpack serve -c playground/webpack.config.js",
     "build": "tsx ./script/build.mts",
+    "prepack": "npm run build",
     "lint": "tsc --noEmit && eslint \"plugin/**/*.ts\" --color --quiet",
     "release": "semantic-release"
   },
@@ -60,13 +70,16 @@
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-import": "^2.29.1",
     "eslint-plugin-prettier": "^5.1.2",
+    "eslint-plugin-simple-import-sort": "12.0.0",
+    "html-webpack-plugin": "5.6.0",
     "prettier": "^3.1.1",
     "semantic-release": "^22.0.12",
-    "tsx": "^4.7.0",
+    "shx": "^0.3.4",
+    "tsx": "^4.7.1",
     "typescript": "^5.3.3",
-    "vite": "5.0.11"
+    "webpack": "^5.90.3",
+    "webpack-cli": "5.1.4",
+    "webpack-dev-server": "^5.0.2"
   },
-  "peerDependencies": {
-    "vite": ">=3"
-  }
+  "packageManager": "yarn@4.1.1"
 }

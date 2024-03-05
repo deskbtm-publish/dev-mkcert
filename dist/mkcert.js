@@ -31,17 +31,9 @@ var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: tru
 var plugin_exports = {};
 __export(plugin_exports, {
   BaseSource: () => BaseSource,
-  default: () => plugin_default
+  mkcert: () => mkcert
 });
 module.exports = __toCommonJS(plugin_exports);
-var import_vite = require("vite");
-
-// plugin/lib/constant.ts
-var import_os = __toESM(require("os"));
-var import_path = __toESM(require("path"));
-var PKG_NAME = "vite-plugin-mkcert";
-var PLUGIN_NAME = PKG_NAME.replace(/-/g, ":");
-var PLUGIN_DATA_DIR = import_path.default.join(import_os.default.homedir(), `.${PKG_NAME}`);
 
 // plugin/lib/util.ts
 var import_child_process = __toESM(require("child_process"));
@@ -50,6 +42,15 @@ var import_fs = __toESM(require("fs"));
 var import_os2 = __toESM(require("os"));
 var import_path2 = __toESM(require("path"));
 var import_util = __toESM(require("util"));
+
+// plugin/lib/constant.ts
+var import_os = __toESM(require("os"));
+var import_path = __toESM(require("path"));
+var PKG_NAME = "publishjs-mkcert";
+var PLUGIN_NAME = PKG_NAME.replace(/-/g, ":");
+var PLUGIN_DATA_DIR = import_path.default.join(import_os.default.homedir(), `.${PKG_NAME}`);
+
+// plugin/lib/util.ts
 var exists = async (filePath) => {
   try {
     await import_fs.default.promises.access(filePath);
@@ -151,8 +152,8 @@ var escape = (path5) => {
 
 // plugin/mkcert/index.ts
 var import_path4 = __toESM(require("path"));
-var import_process = __toESM(require("process"));
 var import_picocolors = __toESM(require("picocolors"));
+var import_process = __toESM(require("process"));
 
 // plugin/lib/logger.ts
 var import_debug = __toESM(require("debug"));
@@ -485,7 +486,7 @@ var Mkcert = class _Mkcert {
     } else if (await exists(this.savedMkcert)) {
       binary = this.savedMkcert;
     }
-    return binary ? escape(binary) : void 0;
+    return binary;
   }
   async checkCAExists() {
     const files = await readDir(this.savePath);
@@ -654,47 +655,25 @@ ${this.certFilePath}`
 var mkcert_default = Mkcert;
 
 // plugin/index.ts
-var plugin = (options = {}) => {
+async function mkcert(options = {}) {
+  const { hosts = [], ...mkcertOptions } = options;
+  const logger = console;
+  const mkcert2 = mkcert_default.create({
+    logger,
+    ...mkcertOptions
+  });
+  await mkcert2.init();
+  const allHosts = [...getDefaultHosts(), ...hosts];
+  const uniqueHosts = Array.from(new Set(allHosts)).filter(Boolean);
+  const certificate = await mkcert2.install(uniqueHosts);
   return {
-    name: PLUGIN_NAME,
-    apply: "serve",
-    config: async ({ server = {}, logLevel }) => {
-      if (typeof server.https === "boolean" && server.https === false) {
-        return;
-      }
-      const { hosts = [], ...mkcertOptions } = options;
-      const logger = (0, import_vite.createLogger)(logLevel, {
-        prefix: PLUGIN_NAME
-      });
-      const mkcert = mkcert_default.create({
-        logger,
-        ...mkcertOptions
-      });
-      await mkcert.init();
-      const allHosts = [...getDefaultHosts(), ...hosts];
-      if (typeof server.host === "string") {
-        allHosts.push(server.host);
-      }
-      const uniqueHosts = Array.from(new Set(allHosts)).filter(Boolean);
-      const certificate = await mkcert.install(uniqueHosts);
-      const httpsConfig = {
-        key: certificate.key && Buffer.from(certificate.key),
-        cert: certificate.cert && Buffer.from(certificate.cert)
-      };
-      return {
-        server: {
-          https: httpsConfig
-        },
-        preview: {
-          https: httpsConfig
-        }
-      };
-    }
+    key: certificate.key && Buffer.from(certificate.key),
+    cert: certificate.cert && Buffer.from(certificate.cert)
   };
-};
-var plugin_default = plugin;
+}
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
-  BaseSource
+  BaseSource,
+  mkcert
 });
 //# sourceMappingURL=mkcert.js.map
