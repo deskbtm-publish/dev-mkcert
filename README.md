@@ -1,4 +1,4 @@
-# @publishjs/dev-mkcert
+# @deskbtm/dev-mkcert
 
 Use mkcert to provide certificate support for https development services.
 
@@ -7,7 +7,7 @@ Use mkcert to provide certificate support for https development services.
 1. Installation dependencies
 
 ```sh
-yarn add @publishjs/dev-mkcert -D
+yarn add @deskbtm/dev-mkcert -D
 ```
 
 2. Configure webpack

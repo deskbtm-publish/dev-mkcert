@@ -1,5 +1,5 @@
 {
-  "name": "@publishjs/dev-mkcert",
+  "name": "@deskbtm/dev-mkcert",
   "version": "1.17.5",
   "description": "Provide certificates for https dev service",
   "repository": {
